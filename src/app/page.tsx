@@ -1,95 +1,67 @@
-import Image from "next/image";
-import styles from "./page.module.css";
-
+'use client'
+import Image from 'next/image'
+import styles from './page.module.css'
+import { Sidebar } from './components/Sidebar/Sidebar'
+import { useState } from 'react'
+import cn from 'classnames'
+import { ICharacter } from './types/character.interface'
+import { AddModal } from './components/AddModal/AddModal'
 export default function Home() {
-  return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol>
-          <li>
-            Get started by editing <code>src/app/page.tsx</code>.
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
+	const [showSidebar, setShowSidebar] = useState<boolean>(false)
+	const [character, setCharacter] = useState<ICharacter>()
+	const [showAddModal, setShowAddModal] = useState<boolean>(false)
+	return (
+		<div className={styles.page}>
+			<main className={styles.main}>
+				<button
+					onClick={() => setShowSidebar(true)}
+					className={cn(styles.burger, showSidebar && styles.burger_active)}
+				>
+					Heroes
+				</button>
+				<button
+					onClick={() => setShowAddModal(true)}
+					className={styles.add_hero}
+				>
+					<svg viewBox='0 0 32 32'>
+						<path d='M31 12h-11v-11c0-0.552-0.448-1-1-1h-6c-0.552 0-1 0.448-1 1v11h-11c-0.552 0-1 0.448-1 1v6c0 0.552 0.448 1 1 1h11v11c0 0.552 0.448 1 1 1h6c0.552 0 1-0.448 1-1v-11h11c0.552 0 1-0.448 1-1v-6c0-0.552-0.448-1-1-1z'></path>
+					</svg>
+				</button>
+				<h1 className={styles.title}>Spider-Man Heroes</h1>
+				<Sidebar
+					character={character}
+					setCharacter={setCharacter}
+					setOpen={setShowSidebar}
+					isOpen={showSidebar}
+				/>
+				<div className={styles.bg}>
+					<Image fill alt='bg' src={'/images/bg.jpg'} />
+				</div>
+				<div className={styles.detail_hero}>
+					{character && (
+						<img
+							className={styles.detail_hero_image}
+							src={character?.image}
+							alt={character?.name}
+						/>
+					)}
+					{character && (
+						<div className={styles.detail_hero_content}>
+							<h2 className={styles.detail_hero_title}>{character?.name}</h2>
+							<p className={styles.detail_hero_description}>
+								Full Name: {character?.fullName}
+							</p>
+						</div>
+					)}
+				</div>
+				<div
+					onClick={() => setShowAddModal(false)}
+					className={cn(styles.layout, !showAddModal && styles.layout_hidden)}
+				></div>
+				<AddModal isShow={showAddModal} setShow={setShowAddModal} />
+			</main>
 
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-            className={styles.secondary}
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className={styles.footer}>
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+			<footer className={styles.footer}></footer>
+		</div>
+	)
 }
