@@ -2,14 +2,27 @@
 import Image from 'next/image'
 import styles from './page.module.css'
 import { Sidebar } from './components/Sidebar/Sidebar'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import cn from 'classnames'
 import { ICharacter } from './types/character.interface'
 import { AddModal } from './components/AddModal/AddModal'
 export default function Home() {
 	const [showSidebar, setShowSidebar] = useState<boolean>(false)
 	const [character, setCharacter] = useState<ICharacter>()
+	const [charactersData, setCharactersData] = useState<ICharacter[]>()
 	const [showAddModal, setShowAddModal] = useState<boolean>(false)
+	useEffect(() => {
+		fetch('http://localhost:5000/characters')
+			.then(res => res.json())
+			.then(data => {
+				console.log(data)
+				setCharactersData(data)
+			})
+			.catch(err => {
+				console.log(err.message)
+			})
+	}, [])
+	console.log(charactersData)
 	return (
 		<div className={styles.page}>
 			<main className={styles.main}>

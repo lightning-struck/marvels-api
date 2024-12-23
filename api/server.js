@@ -1,36 +1,53 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const mysql = require('mysql')
+import mysql2 from 'mysql2'
+import express from 'express'
+import cors from 'cors'
+
+const connection = mysql2.createConnection({
+	host: 'localhost',
+	database: 'marvels_db',
+	user: 'root',
+	password: '123456',
+})
 
 const app = express()
-app.use(bodyParser.json())
-const db = mysql.createConnection({
-	host: 'localhost',
-	user: 'root',
-	password: 'ex_121',
-	database: 'marvels',
-})
-db.connect(err => {
-	if (err) throw err
-	console.log('Connected to database')
-})
-app.get('/characters', (req, res) => {
-	db.query('SELECT * FROM books', (err, results) => {
-		if (err) return res.status(500).send(err)
-		res.json(results)
-	})
-})
+const PORT = 5000
 
-app.get('/characters/:id', (req, res) => {
-	const id = req.params.id
-	db.query('SELECT * FROM books WHERE id = ?', [id], (err, results) => {
-		if (err) return res.status(500).send(err)
-		if (results.length === 0) return res.status(404).send('Book not found')
-		res.json(results[0])
-	})
-})
+app.use(cors())
+app.use(express.json()) // Добавили middleware для парсинга JSON
 
-const PORT = 3001
 app.listen(PORT, () => {
-	console.log(`Server is running on http://localhost:${PORT}`)
+	console.log('Server is running on Port:' + PORT)
+	connection.connect(err => {
+		if (err) throw err
+		console.log('Database connected')
+	})
+})
+
+app.get('/characters', (req, res) => {
+	const sql_query = `SELECT * FROM marvels_table`
+	connection.query(sql_query, (err, result) => {
+		if (err) throw err
+		res.send(result)
+	})
+})
+
+app.post('/characters', (req, res) => {
+	const { name, fullName } = req.body
+	console.log(name, fullName)
+
+	if (!name || !fullName) {
+		return res.status(400).send('Все поля (name, fullName) обязательны')
+	}
+
+	const sql_query = `INSERT INTO marvels_table (name, fullName) VALUES (?, ?)`
+
+	connection.query(sql_query, [name, fullName], (err, result) => {
+		if (err) {
+			console.error('Ошибка при добавлении персонажа:', err)
+			return res.status(500).send('Ошибка при добавлении персонажа')
+		}
+		res
+			.status(201)
+			.send({ message: 'Персонаж успешно добавлен', id: result.insertId })
+	})
 })

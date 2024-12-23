@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import cn from 'classnames'
 import s from './addModal.module.scss'
 type AddModalProps = {
@@ -6,6 +6,28 @@ type AddModalProps = {
 	isShow: boolean
 }
 export const AddModal: React.FC<AddModalProps> = ({ setShow, isShow }) => {
+	const [inputName, setInputName] = useState<string>('')
+	const [inputFullname, setInputFullName] = useState<string>('')
+	const [inputImage, setInputImage] = useState<File | null>(null)
+
+	const handleSubmit = async (event: React.FormEvent) => {
+		event.preventDefault()
+		const formData = new FormData()
+		formData.append('name', inputName)
+		formData.append('fullName', inputFullname) // Исправляем ключ "fullName" на "fullname" для совпадения с сервером
+		if (inputImage) {
+			formData.append('image', inputImage) // Добавляем файл в FormData
+		}
+
+		const response = await fetch('http://localhost:5000/characters', {
+			method: 'POST',
+			body: formData, // Отправляем FormData напрямую
+		})
+
+		const result = await response.json()
+		console.log(result)
+	}
+
 	return (
 		<div className={cn(s.wrapper, isShow && s.wrapper_show)}>
 			<div className={s.title_wrapper}>
@@ -17,15 +39,17 @@ export const AddModal: React.FC<AddModalProps> = ({ setShow, isShow }) => {
 				<h3 className={s.title}>Add New Hero</h3>
 				<img className={s.image_icon} alt='icon' src={'/images/icon.png'} />
 			</div>
-			<form className={s.form}>
+			<form onSubmit={handleSubmit} className={s.form}>
 				<div className={s.forms}>
 					<input
+						onChange={event => setInputName(event.target.value)}
 						type='text'
 						required
 						className={s.input}
 						placeholder='Type entity name...'
 					/>
 					<input
+						onChange={event => setInputFullName(event.target.value)}
 						type='text'
 						required
 						className={s.input}
@@ -34,7 +58,13 @@ export const AddModal: React.FC<AddModalProps> = ({ setShow, isShow }) => {
 					<div className={s.form_file}>
 						<span>Add your image source:</span>
 						<input
+							onChange={event => {
+								if (event.target.files && event.target.files.length > 0) {
+									setInputImage(event.target.files[0])
+								}
+							}}
 							type='file'
+							accept='image/png, image/gif, image/jpeg'
 							required
 							className={s.input}
 							placeholder='Type real name or full name of entity...'
